@@ -42,22 +42,18 @@ public class YbjbImportExcelService extends AbstractImport {
 
     /**
      * 需要子类根据自己的情况过滤、转化数据
-     *
      * @param vos 传入excel读取到的数据list
      */
     @Override
     protected List filterAndConvertData(List vos) {
         List collect = (List) vos.stream().map(vo -> {
-            if (vo.getClass().equals(SfcbExcelVo.class)) {
-                PersonYbjb data = BeanUtil.copyProperties(vo, PersonYbjb.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //拷贝属性到实体类中
-                    PersonYbjb dbData = BeanUtil.copyProperties(vo, PersonYbjb.class);
+            if (SfcbExcelVo.class.equals(vo.getClass())) {
+                //拷贝属性到实体类中
+                PersonYbjb dbData = BeanUtil.copyProperties(vo, PersonYbjb.class);
+                if (IdcardUtil.isValidCard(dbData.getSfzh())) {
                     //转化数据为入库形式
-                    String ssyf = SSYFConvert.convertToDbData(dbData.getSzyf());
-                    String sf = SFConvert.convertToDbData(dbData.getSfzzcb());
-                    dbData.setSzyf(ssyf);
-                    dbData.setSfzzcb(sf);
+                    dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
+                    dbData.setSfzzcb(SFConvert.convertToDbData(dbData.getSfzzcb()));
                     return dbData;
                 }
             }

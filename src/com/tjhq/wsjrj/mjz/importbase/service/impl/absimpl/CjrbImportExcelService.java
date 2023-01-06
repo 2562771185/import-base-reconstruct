@@ -48,8 +48,7 @@ public class CjrbImportExcelService extends AbstractImport {
                 PersonCjrb data = BeanUtil.copyProperties(vo, PersonCjrb.class);
                 if (IdcardUtil.isValidCard(data.getSfzh())) {
                     //转化数据为入库形式
-                    String ssyf = SSYFConvert.convertToDbData(data.getSzyf());
-                    data.setSzyf(ssyf);
+                    data.setSzyf(SSYFConvert.convertToDbData(data.getSzyf()));
                     return data;
                 }
             }

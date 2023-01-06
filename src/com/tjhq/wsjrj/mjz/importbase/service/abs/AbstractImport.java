@@ -27,7 +27,7 @@ import java.util.List;
  * \* @author: mjz
  * \* Date: 2023/1/4
  * \* Time: 10:11
- * \* Description:
+ * \* Description: 抽象导入类，子类实现抽象方法进行导入
  * \
  */
 public abstract class AbstractImport {
@@ -37,18 +37,16 @@ public abstract class AbstractImport {
 
     @Transactional(rollbackFor = Exception.class)
     public Result importExcel(ImportExcelDto excelDto, Class entityClass, Class voClass) {
-        //获取Excel文件
-        MultipartFile excel = excelDto.getExcel();
         //返回给前端的日志字符串
         StringBuilder logStr = new StringBuilder();
         //解析Excel
-        List vos = parseExcel(excel, voClass);
+        List vos = parseExcel(excelDto.getExcel(), voClass);
         //过滤、转化数据
         List entityList = filterAndConvertData(vos);
         log.info("过虑、转化之后的合法数据entityList:" + JSON.toJSONString(entityList));
         log.info("entityList.size():" + entityList.size());
         //保存数据入库
-        int successCount = saveData(entityList, logStr, log, sqlService,entityClass);
+        int successCount = saveData(entityList, logStr, log, sqlService, entityClass);
         logStr.append("--------------------------------" + "表中总数据:[")
                 .append(vos.size())
                 .append("] , 合法数据记录数:[")
@@ -56,18 +54,16 @@ public abstract class AbstractImport {
                 .append("] , 追加成功数: ")
                 .append(successCount)
                 .append("--------------------------------");
-        //打印日志
-        log.info(logStr.toString());
         if (excelDto.getPrintlog()) {
             printLog(logStr);
         }
         if (successCount == vos.size()) {
             return Result.OK("成功追加:[" + successCount + "]条记录", logStr);
         }
-        Result failRes = new Result();
+        Result<String> failRes = new Result<>();
         failRes.setCode(500);
         failRes.setMsg("导入失败:【总记录数:[" + vos.size() + "],合法数据条数:[" + entityList.size() + "],仅成功:[" + successCount + "]条数据】");
-        failRes.setResult(logStr);
+        failRes.setResult(logStr.toString());
         return failRes;
     }
 
@@ -77,7 +73,6 @@ public abstract class AbstractImport {
         MultiMap filterMap = createFilterMap();
         log.info("filterMap:" + filterMap);
         log.info("filterMap.size():" + filterMap.size());
-        //判断是否可以追加：身份证可以重复，（所属年份 && 所属月份）不能同时相等
         return verifyData(entityList, filterMap, logStr, log, sqlService, entityClass);
     }
 
@@ -126,7 +121,7 @@ public abstract class AbstractImport {
             }
         }
         //入库剩余的数据
-        log.info("入库剩余的数据数量:" +sqlList.size());
+        log.info("入库剩余的数据数量:" + sqlList.size());
         log.info("入库剩余的数据:" + JSON.toJSONString(sqlList));
         sqlService.executeBatchSql("master", sqlList);
         return successCount;
@@ -179,6 +174,6 @@ public abstract class AbstractImport {
                 .append("]- 身份证号：[").append(entity.getSfzh())
                 .append("] - 所属年份：[").append(entity.getSznf())
                 .append("] - 所属月份：[").append(Integer.parseInt(entity.getSzyf()) + 1)
-                .append("]-【失败】 第").append(i).append("行\n");
+                .append("]-【失败】 第").append(i + 1).append("行\n");
     }
 }

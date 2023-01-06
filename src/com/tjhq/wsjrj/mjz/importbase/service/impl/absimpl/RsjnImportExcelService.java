@@ -50,17 +50,12 @@ public class RsjnImportExcelService extends AbstractImport {
     protected List filterAndConvertData(List vos) {
         List collect = (List) vos.stream().map(vo -> {
             if (vo.getClass().equals(RsjExcelVo.class)) {
-                PersonRsjn data = BeanUtil.copyProperties(vo, PersonRsjn.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //拷贝属性到实体类中
-                    PersonRsjn dbData = BeanUtil.copyProperties(vo, PersonRsjn.class);
+                PersonRsjn dbData = BeanUtil.copyProperties(vo, PersonRsjn.class);
+                if (IdcardUtil.isValidCard(dbData.getSfzh())) {
                     //转化数据为入库形式
-                    String date = MyDateUtil.formatDate(dbData.getPxrq(), "yyyy-MM-dd");
-                    String ssyf = SSYFConvert.convertToDbData(dbData.getSzyf());
-                    String cbzt = CbztConvert.convertToDbData(dbData.getCbzt());
-                    dbData.setCbzt(cbzt);
-                    dbData.setSzyf(ssyf);
-                    dbData.setPxrq(date);
+                    dbData.setCbzt(CbztConvert.convertToDbData(dbData.getCbzt()));
+                    dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
+                    dbData.setPxrq(MyDateUtil.formatDate(dbData.getPxrq(), "yyyy-MM-dd"));
                     return dbData;
                 }
             }

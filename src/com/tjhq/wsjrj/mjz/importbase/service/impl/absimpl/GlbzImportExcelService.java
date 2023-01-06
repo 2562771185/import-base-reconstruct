@@ -50,8 +50,7 @@ public class GlbzImportExcelService extends AbstractImport {
                 PersonGlbz data = BeanUtil.copyProperties(vo, PersonGlbz.class);
                 if (IdcardUtil.isValidCard(data.getSfzh())) {
                     //转化数据为入库形式
-                    String ssyf = SSYFConvert.convertToDbData(data.getSzyf());
-                    data.setSzyf(ssyf);
+                    data.setSzyf(SSYFConvert.convertToDbData(data.getSzyf()));
                     return data;
                 }
             }

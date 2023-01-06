@@ -71,15 +71,11 @@ public class XczxImportExcelService extends AbstractImport {
                     //转化数据为入库形式
                     String sfxc = SFConvert.convertToDbData(xczxExcelVo.getFxsfxc());
                     log.info("风险是否消除："+sfxc);
-                    String ssyf = SSYFConvert.convertToDbData(xczxExcelVo.getSzyf());
-                    String hlx = HlxConvert.convertToDbData(xczxExcelVo.getHlx());
-                    String jcdxlx = JcdxlxConvert.convertToDbData(xczxExcelVo.getJcdxlx());
-                    String yhzgx = YhzgxConvert.convertToDbData(xczxExcelVo.getYhzgx());
                     dbData.setFxsfxc(Integer.valueOf(sfxc));
-                    dbData.setSzyf(ssyf);
-                    dbData.setHlx(hlx);
-                    dbData.setJcdxlx(jcdxlx);
-                    dbData.setYhzgx(yhzgx);
+                    dbData.setSzyf(SSYFConvert.convertToDbData(xczxExcelVo.getSzyf()));
+                    dbData.setHlx(HlxConvert.convertToDbData(xczxExcelVo.getHlx()));
+                    dbData.setJcdxlx(JcdxlxConvert.convertToDbData(xczxExcelVo.getJcdxlx()));
+                    dbData.setYhzgx(YhzgxConvert.convertToDbData(xczxExcelVo.getYhzgx()));
                     log.info("乡村振兴实体类：" + dbData);
                     return dbData;
                 }

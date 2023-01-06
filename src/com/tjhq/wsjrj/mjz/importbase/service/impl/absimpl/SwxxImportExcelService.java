@@ -51,20 +51,13 @@ public class SwxxImportExcelService extends AbstractImport {
     protected List filterAndConvertData(List vos) {
         List collect = (List) vos.stream().map(vo -> {
             if (vo.getClass().equals(SwxxExcelVo.class)) {
-                PersonSwxx data = BeanUtil.copyProperties(vo, PersonSwxx.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //拷贝属性到实体类中
-                    PersonSwxx dbData = BeanUtil.copyProperties(vo, PersonSwxx.class);
+                PersonSwxx dbData = BeanUtil.copyProperties(vo, PersonSwxx.class);
+                if (IdcardUtil.isValidCard(dbData.getSfzh())) {
                     //转化数据为入库形式
-                    String date =  MyDateUtil.formatDate(dbData.getSwsj(), "yyyy-MM-dd");
-                    //转化数据为入库形式
-                    String ssyf = SSYFConvert.convertToDbData(dbData.getSzyf());
-                    String sfsw = SFConvert.convertToDbData(dbData.getSfsw());
-                    String sjly = SJLYConvert.convertToDbData(dbData.getSjly());
-                    dbData.setSfsw(sfsw);
-                    dbData.setSzyf(ssyf);
-                    dbData.setSjly(sjly);
-                    dbData.setSwsj(date);
+                    dbData.setSfsw(SFConvert.convertToDbData(dbData.getSfsw()));
+                    dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
+                    dbData.setSjly(SJLYConvert.convertToDbData(dbData.getSjly()));
+                    dbData.setSwsj(MyDateUtil.formatDate(dbData.getSwsj(), "yyyy-MM-dd"));
                     return dbData;
                 }
             }

@@ -52,21 +52,15 @@ public class TyImportExcelService extends AbstractImport {
     protected List filterAndConvertData(List vos) {
         List collect = (List) vos.stream().map(vo -> {
             if (vo.getClass().equals(TYExcelVo.class)) {
-                PersonTY data = BeanUtil.copyProperties(vo, PersonTY.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //拷贝属性到实体类中
-                    PersonTY dbData = BeanUtil.copyProperties(vo, PersonTY.class);
+                //拷贝属性到实体类中
+                PersonTY dbData = BeanUtil.copyProperties(vo, PersonTY.class);
+                if (IdcardUtil.isValidCard(dbData.getSfzh())) {
                     //转化数据为入库形式
-                    String rwsj = MyDateUtil.formatDate(dbData.getRwsj(), "yyyy-MM-dd");
-                    String twsj = MyDateUtil.formatDate(dbData.getTwsj(), "yyyy-MM-dd");
-                    String ssyf = SSYFConvert.convertToDbData(dbData.getSzyf());
-                    String dxzt = DXZTConvert.convertToDbData(dbData.getDxzt());
-                    String rylb = RYLBConvert.convertToDbData(dbData.getRylb());
-                    dbData.setSzyf(ssyf);
-                    dbData.setDxzt(dxzt);
-                    dbData.setRylb(rylb);
-                    dbData.setTwsj(twsj);
-                    dbData.setRwsj(rwsj);
+                    dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
+                    dbData.setDxzt(DXZTConvert.convertToDbData(dbData.getDxzt()));
+                    dbData.setRylb(RYLBConvert.convertToDbData(dbData.getRylb()));
+                    dbData.setTwsj(MyDateUtil.formatDate(dbData.getTwsj(), "yyyy-MM-dd"));
+                    dbData.setRwsj(MyDateUtil.formatDate(dbData.getRwsj(), "yyyy-MM-dd"));
                     return dbData;
                 }
             }

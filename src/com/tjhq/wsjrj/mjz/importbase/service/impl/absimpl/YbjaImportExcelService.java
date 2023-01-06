@@ -56,15 +56,12 @@ public class YbjaImportExcelService extends AbstractImport {
     protected List filterAndConvertData(List vos) {
         List collect = (List) vos.stream().map(vo -> {
             if (vo.getClass().equals(MbkbzExcelVo.class)) {
-                PersonYbja data = BeanUtil.copyProperties(vo, PersonYbja.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //拷贝属性到实体类中
-                    PersonYbja dbData = BeanUtil.copyProperties(vo, PersonYbja.class);
+                //拷贝属性到实体类中
+                PersonYbja dbData = BeanUtil.copyProperties(vo, PersonYbja.class);
+                if (IdcardUtil.isValidCard(dbData.getSfzh())) {
                     //转化数据为入库形式
-                    String ssyf = SSYFConvert.convertToDbData(dbData.getSzyf());
-                    String mbkbz = MbkbzConvert.convertToDbData(dbData.getMbkbz());
-                    dbData.setMbkbz(mbkbz);
-                    dbData.setSzyf(ssyf);
+                    dbData.setMbkbz(MbkbzConvert.convertToDbData(dbData.getMbkbz()));
+                    dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
                     return dbData;
                 }
             }

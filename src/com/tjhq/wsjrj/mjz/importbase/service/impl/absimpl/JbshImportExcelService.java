@@ -48,15 +48,11 @@ public class JbshImportExcelService extends AbstractImport {
     protected List filterAndConvertData(List vos) {
         List collect = (List) vos.stream().map(vo -> {
             if (vo.getClass().equals(JbshExcelVo.class)) {
-                PersonJbsh data = BeanUtil.copyProperties(vo, PersonJbsh.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //拷贝属性到实体类中
-                    PersonJbsh dbData = BeanUtil.copyProperties(vo, PersonJbsh.class);
+                PersonJbsh dbData = BeanUtil.copyProperties(vo, PersonJbsh.class);
+                if (IdcardUtil.isValidCard(dbData.getSfzh())) {
                     //转化数据为入库形式
-                    String ssyf = SSYFConvert.convertToDbData(dbData.getSzyf());
-                    String hbzlx = JbshConvert.convertToDbData(dbData.getHbzlx());
-                    dbData.setSzyf(ssyf);
-                    dbData.setHbzlx(hbzlx);
+                    dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
+                    dbData.setHbzlx(JbshConvert.convertToDbData(dbData.getHbzlx()));
                     return dbData;
                 }
             }
@@ -68,6 +64,7 @@ public class JbshImportExcelService extends AbstractImport {
 
     /**
      * 生成过滤map
+     *
      * @return 身份证号为key，多个entity为value的map
      */
     @Override

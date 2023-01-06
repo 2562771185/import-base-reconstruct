@@ -51,15 +51,10 @@ public class CLImportExcelService extends AbstractImport {
                 PersonCL data = BeanUtil.copyProperties(vo, PersonCL.class);
                 if (IdcardUtil.isValidCard(data.getSfzh())) {
                     //转化数据为入库形式
-                    //转化数据为入库形式
-                    String ssyf = SSYFConvert.convertToDbData(data.getSzyf());
-                    String cjlb = CJLBConvert.convertToDbData(data.getCjlb());
-                    String cjdj = CJDJConvert.convertToDbData(data.getCjdj());
-                    String czzt = CZZTConvert.convertToDbData(data.getCzzt());
-                    data.setSzyf(ssyf);
-                    data.setCjlb(cjlb);
-                    data.setCjdj(cjdj);
-                    data.setCzzt(czzt);
+                    data.setSzyf(SSYFConvert.convertToDbData(data.getSzyf()));
+                    data.setCjlb(CJLBConvert.convertToDbData(data.getCjlb()));
+                    data.setCjdj(CJDJConvert.convertToDbData(data.getCjdj()));
+                    data.setCzzt(CZZTConvert.convertToDbData(data.getCzzt()));
                     return data;
                 }
             }
