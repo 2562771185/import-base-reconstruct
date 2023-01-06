@@ -1,7 +1,7 @@
 package com.tjhq.wsjrj.mjz.importbase.model.vo;
 
 
-import com.tjhq.wsjrj.mjz.importbase.config.ExcelColumn;
+import com.tjhq.wsjrj.mjz.importbase.annotation.ExcelColumn;
 
 
 /**

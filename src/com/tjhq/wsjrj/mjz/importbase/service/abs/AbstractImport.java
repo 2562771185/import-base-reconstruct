@@ -1,14 +1,22 @@
 package com.tjhq.wsjrj.mjz.importbase.service.abs;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.IdcardUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hw.fb.form.adapter.sql.service.IFormSqlService;
 import com.tjhq.hqoa.framework.framework.Result;
 import com.tjhq.wsjrj.mjz.importbase.constants.SysConstant;
+import com.tjhq.wsjrj.mjz.importbase.handler.convert.cl.CJDJConvert;
+import com.tjhq.wsjrj.mjz.importbase.handler.convert.cl.CJLBConvert;
+import com.tjhq.wsjrj.mjz.importbase.handler.convert.cl.CZZTConvert;
+import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SSYFConvert;
 import com.tjhq.wsjrj.mjz.importbase.model.dto.ImportExcelDto;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.BaseEntity;
-import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonCjra;
+import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonCL;
+import com.tjhq.wsjrj.mjz.importbase.model.vo.CLExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.utils.YCLogUtil;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.BeanUtils;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.MyExcelUtils;
@@ -16,12 +24,15 @@ import lombok.SneakyThrows;
 import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.formula.functions.T;
+import org.checkerframework.checker.units.qual.K;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * \* Created with IntelliJ IDEA.
@@ -171,7 +182,7 @@ public abstract class AbstractImport {
 
     protected abstract String buildSqlString(BaseEntity entity);
 
-    protected void generateSuccessLogString(StringBuilder logStr, BaseEntity entity) {
+    private void generateSuccessLogString(StringBuilder logStr, BaseEntity entity) {
         logStr.append(DateTime.now()).append(" - 追加成功-条件通过:\n")
                 .append(" - 姓名:[").append(entity.getXm())
                 .append("]- 身份证号：[").append(entity.getSfzh())
@@ -179,7 +190,7 @@ public abstract class AbstractImport {
                 .append(Integer.parseInt(entity.getSzyf()) + 1).append("]-【成功】 \n");
     }
 
-    protected void generateFailLogString(StringBuilder logStr, BaseEntity entity, int i) {
+    private void generateFailLogString(StringBuilder logStr, BaseEntity entity, int i) {
         logStr.append(DateTime.now()).append(" - 追加失败-条件不通过:\n").append(" <身份证>重复")
                 .append(" <所属年份>重复 ").append(" <所属月份>重复 ")
                 .append(" - 姓名:[").append(entity.getXm())
@@ -187,10 +198,5 @@ public abstract class AbstractImport {
                 .append("] - 所属年份：[").append(entity.getSznf())
                 .append("] - 所属月份：[").append(Integer.parseInt(entity.getSzyf()) + 1)
                 .append("]-【失败】 第").append(i + 1).append("行\n");
-    }
-
-    public static void main(String[] args) {
-        Class clz = PersonCjra.class;
-        System.out.println(clz.getSimpleName());
     }
 }

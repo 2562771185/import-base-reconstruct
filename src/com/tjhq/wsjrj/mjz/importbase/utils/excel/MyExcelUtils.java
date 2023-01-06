@@ -3,7 +3,7 @@ package com.tjhq.wsjrj.mjz.importbase.utils.excel;
 import cn.hutool.core.date.DateTime;
 import com.tjhq.hqoa.framework.framework.Result;
 import com.tjhq.wsjrj.mjz.importbase.constants.SysConstant;
-import com.tjhq.wsjrj.mjz.importbase.config.ExcelColumn;
+import com.tjhq.wsjrj.mjz.importbase.annotation.ExcelColumn;
 import com.tjhq.wsjrj.mjz.importbase.utils.YCLogUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;

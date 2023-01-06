@@ -4,7 +4,10 @@
       <root url="file://W:/yc/apache-tomcat-9.0.46/webapps/yc/WEB-INF/lib" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ideaLibSources/mybatis-plus-extension-3.4.2-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.ideaLibSources/mybatis-plus-extension-3.4.2-sources.jar!/" />
+    </SOURCES>
     <jarDirectory url="file://W:/yc/apache-tomcat-9.0.46/webapps/yc/WEB-INF/lib" recursive="false" />
   </library>
 </component>

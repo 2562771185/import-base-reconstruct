@@ -1,4 +1,4 @@
-package com.tjhq.wsjrj.mjz.importbase.config;
+package com.tjhq.wsjrj.mjz.importbase.annotation;
 
 import java.lang.annotation.*;
 
