@@ -36,8 +36,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CLImportExcelService extends AbstractImport {
-    @Autowired
-    private PersonCLService clService;
 
     /**
      * 需要子类根据自己的情况过滤、转化数据
@@ -45,40 +43,24 @@ public class CLImportExcelService extends AbstractImport {
      * @param vos 传入excel读取到的数据list
      */
     @Override
-    protected List filterAndConvertData(List vos) {
-        List collect = (List) vos.stream().map(vo -> {
-            if (vo.getClass().equals(CLExcelVo.class)) {
-                PersonCL data = BeanUtil.copyProperties(vo, PersonCL.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //转化数据为入库形式
-                    data.setSzyf(SSYFConvert.convertToDbData(data.getSzyf()));
-                    data.setCjlb(CJLBConvert.convertToDbData(data.getCjlb()));
-                    data.setCjdj(CJDJConvert.convertToDbData(data.getCjdj()));
-                    data.setCzzt(CZZTConvert.convertToDbData(data.getCzzt()));
-                    return data;
-                }
-            }
-            return null;
-        }).collect(Collectors.toList());
-        collect = (List) collect.stream().filter(item -> ObjectUtil.isNotNull(item)).collect(Collectors.toList());
-        return collect;
+    protected List<?> filterAndConvertData(List<?> vos) {
+        return vos.stream().map(vo -> {
+                    if (vo.getClass().equals(CLExcelVo.class)) {
+                        PersonCL data = BeanUtil.copyProperties(vo, PersonCL.class);
+                        if (IdcardUtil.isValidCard(data.getSfzh())) {
+                            //转化数据为入库形式
+                            data.setSzyf(SSYFConvert.convertToDbData(data.getSzyf()));
+                            data.setCjlb(CJLBConvert.convertToDbData(data.getCjlb()));
+                            data.setCjdj(CJDJConvert.convertToDbData(data.getCjdj()));
+                            data.setCzzt(CZZTConvert.convertToDbData(data.getCzzt()));
+                            return data;
+                        }
+                    }
+                    return null;
+                }).filter(ObjectUtil::isNotNull)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * 生成过滤map
-     *
-     * @return 身份证号为key，多个entity为value的map
-     */
-    @Override
-    protected MultiMap createFilterMap() {
-        MultiMap sfzhMap = new MultiValueMap();
-        List<PersonCL> list = clService.list();
-        for (PersonCL cl : list) {
-            sfzhMap.put(cl.getSfzh(), cl);
-        }
-        sfzhMap.put(null, null);
-        return sfzhMap;
-    }
 
     /**
      * 输出日志到文件中
@@ -89,8 +71,8 @@ public class CLImportExcelService extends AbstractImport {
     }
 
     /**
-     * @param entity
-     * @return
+     * @param entity 解析得到的实体类
+     * @return 返回拼接的插入SQL
      */
     @Override
     protected String buildSqlString(BaseEntity entity) {

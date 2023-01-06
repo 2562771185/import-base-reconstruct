@@ -2,6 +2,7 @@ package com.tjhq.wsjrj.mjz.importbase.service.abs;
 
 import cn.hutool.core.date.DateTime;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.hw.fb.form.adapter.sql.service.IFormSqlService;
 import com.tjhq.hqoa.framework.framework.Result;
 import com.tjhq.wsjrj.mjz.importbase.constants.SysConstant;
@@ -9,17 +10,17 @@ import com.tjhq.wsjrj.mjz.importbase.model.dto.ImportExcelDto;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.BaseEntity;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonCjra;
 import com.tjhq.wsjrj.mjz.importbase.utils.YCLogUtil;
+import com.tjhq.wsjrj.mjz.importbase.utils.excel.BeanUtils;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.MyExcelUtils;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.MultiMap;
+import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -36,13 +37,13 @@ public abstract class AbstractImport {
     private IFormSqlService sqlService;
 
     @Transactional(rollbackFor = Exception.class)
-    public Result importExcel(ImportExcelDto excelDto, Class entityClass, Class voClass) {
+    public Result<?> importExcel(ImportExcelDto excelDto, Class<?> entityClass, Class<?> voClass) {
         //返回给前端的日志字符串
         StringBuilder logStr = new StringBuilder();
         //解析Excel
-        List vos = parseExcel(excelDto.getExcel(), voClass);
+        List<?> vos = parseExcel(excelDto.getExcel(), voClass);
         //过滤、转化数据
-        List entityList = filterAndConvertData(vos);
+        List<?> entityList = filterAndConvertData(vos);
         log.info("过虑、转化之后的合法数据entityList:" + JSON.toJSONString(entityList));
         log.info("entityList.size():" + entityList.size());
         //保存数据入库
@@ -68,16 +69,16 @@ public abstract class AbstractImport {
     }
 
 
-    private int saveData(List entityList, StringBuilder logStr, YCLogUtil log, IFormSqlService sqlService, Class entityClass) {
+    private int saveData(List<?> entityList, StringBuilder logStr, YCLogUtil log, IFormSqlService sqlService, Class<?> entityClass) {
         //生成过滤map
-        MultiMap filterMap = createFilterMap();
+        MultiMap filterMap = createFilterMap(entityClass);
         log.info("filterMap:" + filterMap);
         log.info("filterMap.size():" + filterMap.size());
-        return verifyData(entityList, filterMap, logStr, log, sqlService, entityClass);
+        return verifyData(entityList, filterMap, logStr, log, sqlService);
     }
 
     @SneakyThrows
-    private int verifyData(List entityList, MultiMap sfzhMap, StringBuilder logStr, YCLogUtil log, IFormSqlService sqlService, Class entityClass) {
+    private int verifyData(List<?> entityList, MultiMap sfzhMap, StringBuilder logStr, YCLogUtil log, IFormSqlService sqlService) {
         int successCount = 0;
         //存储一定量sql语句再一起执行
         ArrayList<String> sqlList = new ArrayList<>(SysConstant.BATCH_COUNT);
@@ -91,7 +92,7 @@ public abstract class AbstractImport {
             log.info("身份证是否重复：" + verifyIdCard);
             //判断身份证是否重复
             if (verifyIdCard) {
-                Collection<BaseEntity> sfzList = (Collection<BaseEntity>) sfzhMap.get(entity.getSfzh());
+                List<BaseEntity> sfzList = (List<BaseEntity>) sfzhMap.get(entity.getSfzh());
                 log.info("身份证重复数据列表:" + JSON.toJSONString(sfzList));
                 log.info("sfzList.size():" + sfzList.size());
                 for (BaseEntity nfYfVo : sfzList) {
@@ -128,8 +129,8 @@ public abstract class AbstractImport {
     }
 
 
-    private List parseExcel(MultipartFile excel, Class voClass) {
-        List vos = MyExcelUtils.readExcel(voClass, excel);
+    private List<?> parseExcel(MultipartFile excel, Class<?> voClass) {
+        List<?> vos = MyExcelUtils.readExcel(voClass, excel);
         log.info("读取到的数据：" + JSON.toJSONString(vos));
         if (CollectionUtils.isEmpty(vos) || vos.size() < 1) {
             log.info("解析数据失败，无数据:" + excel.getOriginalFilename());
@@ -143,14 +144,25 @@ public abstract class AbstractImport {
      *
      * @param vos 传入excel读取到的数据list
      */
-    protected abstract List<T> filterAndConvertData(List vos);
+    protected abstract List<?> filterAndConvertData(List<?> vos);
 
     /**
      * 生成过滤map
      *
      * @return 身份证号为key，多个entity为value的map
      */
-    protected abstract MultiMap createFilterMap();
+    private MultiMap createFilterMap(Class<?> clz) {
+        IService<BaseEntity> service = (IService<BaseEntity>) BeanUtils.getBean(clz.getSimpleName() + "Service");
+        log.info("service = " + service);
+        List<BaseEntity> list = service.list();
+        log.info("list = " + JSON.toJSONString(list));
+        MultiMap sfzhMap = new MultiValueMap();
+        for (BaseEntity cl : list) {
+            sfzhMap.put(cl.getSfzh(), cl);
+        }
+        sfzhMap.put(null, null);
+        return sfzhMap;
+    }
 
     /**
      * 输出日志到文件中
@@ -175,5 +187,10 @@ public abstract class AbstractImport {
                 .append("] - 所属年份：[").append(entity.getSznf())
                 .append("] - 所属月份：[").append(Integer.parseInt(entity.getSzyf()) + 1)
                 .append("]-【失败】 第").append(i + 1).append("行\n");
+    }
+
+    public static void main(String[] args) {
+        Class clz = PersonCjra.class;
+        System.out.println(clz.getSimpleName());
     }
 }

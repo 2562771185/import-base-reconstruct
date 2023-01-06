@@ -8,24 +8,14 @@ import com.tjhq.hqoa.platform.system.dto.SysUserDto;
 import com.tjhq.hqoa.platform.system.util.SysUserUtil;
 import com.tjhq.hqoa.workFlow.core.util.UUIDUtil;
 import com.tjhq.wsjrj.mjz.importbase.constants.SysConstant;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SFConvert;
 import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SSYFConvert;
 import com.tjhq.wsjrj.mjz.importbase.handler.convert.mbkbz.MbkbzConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.ty.DXZTConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.ty.RYLBConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.xczx.HlxConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.xczx.JcdxlxConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.xczx.YhzgxConvert;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.BaseEntity;
-import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonTY;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonYbja;
 import com.tjhq.wsjrj.mjz.importbase.model.vo.MbkbzExcelVo;
-import com.tjhq.wsjrj.mjz.importbase.model.vo.XczxExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.service.abs.AbstractImport;
 import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonYbjaService;
-import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonYbjaService;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.FileUtil;
-import com.tjhq.wsjrj.mjz.importbase.utils.excel.MyDateUtil;
 import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +34,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class YbjaImportExcelService extends AbstractImport {
-    @Autowired
-    private PersonYbjaService ybjaService;
+
 
     /**
      * 需要子类根据自己的情况过滤、转化数据
@@ -53,8 +42,8 @@ public class YbjaImportExcelService extends AbstractImport {
      * @param vos 传入excel读取到的数据list
      */
     @Override
-    protected List filterAndConvertData(List vos) {
-        List collect = (List) vos.stream().map(vo -> {
+    protected List<?> filterAndConvertData(List<?> vos) {
+        return vos.stream().map(vo -> {
             if (vo.getClass().equals(MbkbzExcelVo.class)) {
                 //拷贝属性到实体类中
                 PersonYbja dbData = BeanUtil.copyProperties(vo, PersonYbja.class);
@@ -66,26 +55,9 @@ public class YbjaImportExcelService extends AbstractImport {
                 }
             }
             return null;
-        }).collect(Collectors.toList());
-        collect = (List) collect.stream().filter(item -> ObjectUtil.isNotNull(item)).collect(Collectors.toList());
-        return collect;
+        }).filter(ObjectUtil::isNotNull).collect(Collectors.toList());
     }
 
-    /**
-     * 生成过滤map
-     *
-     * @return 身份证号为key，多个entity为value的map
-     */
-    @Override
-    protected MultiMap createFilterMap() {
-        MultiMap sfzhMap = new MultiValueMap();
-        List<PersonYbja> list = ybjaService.list();
-        for (PersonYbja cl : list) {
-            sfzhMap.put(cl.getSfzh(), cl);
-        }
-        sfzhMap.put(null, null);
-        return sfzhMap;
-    }
 
     /**
      * 输出日志到文件中
@@ -96,8 +68,8 @@ public class YbjaImportExcelService extends AbstractImport {
     }
 
     /**
-     * @param entity
-     * @return
+     * @param entity 解析得到的实体类
+     * @return 返回拼接的插入SQL
      */
     @Override
     protected String buildSqlString(BaseEntity entity) {

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 * @description 针对表【fm_hrmdata_jbsh】的数据库操作Service实现
 * @createDate 2022-12-08 15:19:47
 */
-@Service
+@Service("PersonJbshService")
 public class PersonJbshServiceImpl extends ServiceImpl<PersonJbshMapper, PersonJbsh>
     implements PersonJbshService {
 

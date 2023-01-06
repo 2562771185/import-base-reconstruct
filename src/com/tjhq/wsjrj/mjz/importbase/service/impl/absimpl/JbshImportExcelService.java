@@ -12,10 +12,8 @@ import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SSYFConvert;
 import com.tjhq.wsjrj.mjz.importbase.handler.convert.jbsh.JbshConvert;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.BaseEntity;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonJbsh;
-import com.tjhq.wsjrj.mjz.importbase.model.vo.GrzfExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.model.vo.JbshExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.service.abs.AbstractImport;
-import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonJbshService;
 import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonJbshService;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.FileUtil;
 import org.apache.commons.collections.MultiMap;
@@ -36,8 +34,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class JbshImportExcelService extends AbstractImport {
-    @Autowired
-    private PersonJbshService jbshService;
 
     /**
      * 需要子类根据自己的情况过滤、转化数据
@@ -45,8 +41,8 @@ public class JbshImportExcelService extends AbstractImport {
      * @param vos 传入excel读取到的数据list
      */
     @Override
-    protected List filterAndConvertData(List vos) {
-        List collect = (List) vos.stream().map(vo -> {
+    protected List<?> filterAndConvertData(List<?> vos) {
+        return vos.stream().map(vo -> {
             if (vo.getClass().equals(JbshExcelVo.class)) {
                 PersonJbsh dbData = BeanUtil.copyProperties(vo, PersonJbsh.class);
                 if (IdcardUtil.isValidCard(dbData.getSfzh())) {
@@ -57,25 +53,7 @@ public class JbshImportExcelService extends AbstractImport {
                 }
             }
             return null;
-        }).collect(Collectors.toList());
-        collect = (List) collect.stream().filter(item -> ObjectUtil.isNotNull(item)).collect(Collectors.toList());
-        return collect;
-    }
-
-    /**
-     * 生成过滤map
-     *
-     * @return 身份证号为key，多个entity为value的map
-     */
-    @Override
-    protected MultiMap createFilterMap() {
-        MultiMap sfzhMap = new MultiValueMap();
-        List<PersonJbsh> list = jbshService.list();
-        for (PersonJbsh cl : list) {
-            sfzhMap.put(cl.getSfzh(), cl);
-        }
-        sfzhMap.put(null, null);
-        return sfzhMap;
+        }).filter(ObjectUtil::isNotNull).collect(Collectors.toList());
     }
 
     /**
@@ -87,8 +65,8 @@ public class JbshImportExcelService extends AbstractImport {
     }
 
     /**
-     * @param entity
-     * @return
+     * @param entity 解析得到的实体类
+     * @return 返回拼接的插入SQL
      */
     @Override
     protected String buildSqlString(BaseEntity entity) {

@@ -8,17 +8,13 @@ import com.tjhq.hqoa.platform.system.dto.SysUserDto;
 import com.tjhq.hqoa.platform.system.util.SysUserUtil;
 import com.tjhq.hqoa.workFlow.core.util.UUIDUtil;
 import com.tjhq.wsjrj.mjz.importbase.constants.SysConstant;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SFConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SJLYConvert;
 import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SSYFConvert;
 import com.tjhq.wsjrj.mjz.importbase.handler.convert.ty.DXZTConvert;
 import com.tjhq.wsjrj.mjz.importbase.handler.convert.ty.RYLBConvert;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.BaseEntity;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonTY;
-import com.tjhq.wsjrj.mjz.importbase.model.vo.SwxxExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.model.vo.TYExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.service.abs.AbstractImport;
-import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonTYService;
 import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonTYService;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.FileUtil;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.MyDateUtil;
@@ -40,8 +36,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TyImportExcelService extends AbstractImport {
-    @Autowired
-    private PersonTYService tyService;
 
     /**
      * 需要子类根据自己的情况过滤、转化数据
@@ -49,41 +43,27 @@ public class TyImportExcelService extends AbstractImport {
      * @param vos 传入excel读取到的数据list
      */
     @Override
-    protected List filterAndConvertData(List vos) {
-        List collect = (List) vos.stream().map(vo -> {
-            if (vo.getClass().equals(TYExcelVo.class)) {
-                //拷贝属性到实体类中
-                PersonTY dbData = BeanUtil.copyProperties(vo, PersonTY.class);
-                if (IdcardUtil.isValidCard(dbData.getSfzh())) {
-                    //转化数据为入库形式
-                    dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
-                    dbData.setDxzt(DXZTConvert.convertToDbData(dbData.getDxzt()));
-                    dbData.setRylb(RYLBConvert.convertToDbData(dbData.getRylb()));
-                    dbData.setTwsj(MyDateUtil.formatDate(dbData.getTwsj(), "yyyy-MM-dd"));
-                    dbData.setRwsj(MyDateUtil.formatDate(dbData.getRwsj(), "yyyy-MM-dd"));
-                    return dbData;
-                }
-            }
-            return null;
-        }).collect(Collectors.toList());
-        collect = (List) collect.stream().filter(item -> ObjectUtil.isNotNull(item)).collect(Collectors.toList());
-        return collect;
+    protected List<?> filterAndConvertData(List<?> vos) {
+        return vos.stream().map(vo -> {
+                    if (vo.getClass().equals(TYExcelVo.class)) {
+                        //拷贝属性到实体类中
+                        PersonTY dbData = BeanUtil.copyProperties(vo, PersonTY.class);
+                        if (IdcardUtil.isValidCard(dbData.getSfzh())) {
+                            //转化数据为入库形式
+                            dbData.setSzyf(SSYFConvert.convertToDbData(dbData.getSzyf()));
+                            dbData.setDxzt(DXZTConvert.convertToDbData(dbData.getDxzt()));
+                            dbData.setRylb(RYLBConvert.convertToDbData(dbData.getRylb()));
+                            dbData.setTwsj(MyDateUtil.formatDate(dbData.getTwsj(), "yyyy-MM-dd"));
+                            dbData.setRwsj(MyDateUtil.formatDate(dbData.getRwsj(), "yyyy-MM-dd"));
+                            return dbData;
+                        }
+                    }
+                    return null;
+                })
+                .filter(ObjectUtil::isNotNull)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * 生成过滤map
-     * @return 身份证号为key，多个entity为value的map
-     */
-    @Override
-    protected MultiMap createFilterMap() {
-        MultiMap sfzhMap = new MultiValueMap();
-        List<PersonTY> list = tyService.list();
-        for (PersonTY cl : list) {
-            sfzhMap.put(cl.getSfzh(), cl);
-        }
-        sfzhMap.put(null, null);
-        return sfzhMap;
-    }
 
     /**
      * 输出日志到文件中
@@ -94,8 +74,8 @@ public class TyImportExcelService extends AbstractImport {
     }
 
     /**
-     * @param entity
-     * @return
+     * @param entity 解析得到的实体类
+     * @return 返回拼接的插入SQL
      */
     @Override
     protected String buildSqlString(BaseEntity entity) {

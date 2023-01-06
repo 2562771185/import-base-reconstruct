@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 * @description 针对表【fm_hrmdata_glbz】的数据库操作Service实现
 * @createDate 2022-12-08 14:44:07
 */
-@Service
+@Service("PersonGlbzService")
 public class PersonGlbzServiceImpl extends ServiceImpl<PersonGlbzMapper, PersonGlbz>
     implements PersonGlbzService {
 

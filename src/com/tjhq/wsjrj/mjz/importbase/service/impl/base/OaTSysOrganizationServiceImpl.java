@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 * @description 针对表【oa_t_sys_organization】的数据库操作Service实现
 * @createDate 2022-12-12 10:33:15
 */
-@Service
+@Service("OaTSysOrganizationService")
 public class OaTSysOrganizationServiceImpl extends ServiceImpl<OaTSysOrganizationMapper, OaTSysOrganization>
     implements OaTSysOrganizationService {
 

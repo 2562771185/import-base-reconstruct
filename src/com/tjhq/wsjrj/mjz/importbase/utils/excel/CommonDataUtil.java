@@ -85,7 +85,6 @@ public class CommonDataUtil {
         log.info("所属来源列表:" + SSLY_MAP);
 
         PersonMbkbzMapper mbkbzMapper = BeanUtils.getBean(PersonMbkbzMapper.class);
-        log.info("mbkbzMapper" + mbkbzMapper);
         List<Mbkbz> mbkbzs = mbkbzMapper.selectList(null);
         MBKBZ_MAP = mbkbzs.stream().collect(Collectors.toMap(Mbkbz::getMbkbz, Mbkbz::getBh));
         log.info("慢病卡病种列表:" + MBKBZ_MAP);

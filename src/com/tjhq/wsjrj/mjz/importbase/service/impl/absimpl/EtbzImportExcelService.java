@@ -8,16 +8,11 @@ import com.tjhq.hqoa.platform.system.dto.SysUserDto;
 import com.tjhq.hqoa.platform.system.util.SysUserUtil;
 import com.tjhq.hqoa.workFlow.core.util.UUIDUtil;
 import com.tjhq.wsjrj.mjz.importbase.constants.SysConstant;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.cl.CJDJConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.cl.CJLBConvert;
-import com.tjhq.wsjrj.mjz.importbase.handler.convert.cl.CZZTConvert;
 import com.tjhq.wsjrj.mjz.importbase.handler.convert.common.SSYFConvert;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.BaseEntity;
 import com.tjhq.wsjrj.mjz.importbase.model.entity.PersonEtbz;
-import com.tjhq.wsjrj.mjz.importbase.model.vo.CLExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.model.vo.EtbzExcelVo;
 import com.tjhq.wsjrj.mjz.importbase.service.abs.AbstractImport;
-import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonEtbzService;
 import com.tjhq.wsjrj.mjz.importbase.service.intf.PersonEtbzService;
 import com.tjhq.wsjrj.mjz.importbase.utils.excel.FileUtil;
 import org.apache.commons.collections.MultiMap;
@@ -38,8 +33,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class EtbzImportExcelService extends AbstractImport {
-    @Autowired
-    private PersonEtbzService etbzService;
 
     /**
      * 需要子类根据自己的情况过滤、转化数据
@@ -47,35 +40,19 @@ public class EtbzImportExcelService extends AbstractImport {
      * @param vos 传入excel读取到的数据list
      */
     @Override
-    protected List filterAndConvertData(List vos) {
-        List collect = (List) vos.stream().map(vo -> {
-            if (vo.getClass().equals(EtbzExcelVo.class)) {
-                PersonEtbz data = BeanUtil.copyProperties(vo, PersonEtbz.class);
-                if (IdcardUtil.isValidCard(data.getSfzh())) {
-                    //转化数据为入库形式
-                    data.setSzyf(SSYFConvert.convertToDbData(data.getSzyf()));
-                    return data;
-                }
-            }
-            return null;
-        }).collect(Collectors.toList());
-        collect = (List) collect.stream().filter(item -> ObjectUtil.isNotNull(item)).collect(Collectors.toList());
-        return collect;
-    }
-
-    /**
-     * 生成过滤map
-     * @return 身份证号为key，多个entity为value的map
-     */
-    @Override
-    protected MultiMap createFilterMap() {
-        MultiMap sfzhMap = new MultiValueMap();
-        List<PersonEtbz> list = etbzService.list();
-        for (PersonEtbz cl : list) {
-            sfzhMap.put(cl.getSfzh(), cl);
-        }
-        sfzhMap.put(null, null);
-        return sfzhMap;
+    protected List<?> filterAndConvertData(List<?> vos) {
+        return vos.stream().map(vo -> {
+                    if (vo.getClass().equals(EtbzExcelVo.class)) {
+                        PersonEtbz data = BeanUtil.copyProperties(vo, PersonEtbz.class);
+                        if (IdcardUtil.isValidCard(data.getSfzh())) {
+                            //转化数据为入库形式
+                            data.setSzyf(SSYFConvert.convertToDbData(data.getSzyf()));
+                            return data;
+                        }
+                    }
+                    return null;
+                })
+                .filter(ObjectUtil::isNotNull).collect(Collectors.toList());
     }
 
     /**
@@ -87,8 +64,8 @@ public class EtbzImportExcelService extends AbstractImport {
     }
 
     /**
-     * @param entity
-     * @return
+     * @param entity 解析得到的实体类
+     * @return 返回拼接的插入SQL
      */
     @Override
     protected String buildSqlString(BaseEntity entity) {

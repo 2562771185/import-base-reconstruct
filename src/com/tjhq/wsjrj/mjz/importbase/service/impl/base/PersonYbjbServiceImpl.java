@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 * @description 针对表【fm_hrmdata_ybjb】的数据库操作Service实现
 * @createDate 2022-12-08 17:00:37
 */
-@Service
+@Service("PersonYbjbService")
 public class PersonYbjbServiceImpl extends ServiceImpl<PersonYbjbMapper, PersonYbjb>
     implements PersonYbjbService {
 

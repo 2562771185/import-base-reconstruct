@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 * @description 针对表【fm_hrmdata_cl】的数据库操作Service实现
 * @createDate 2022-12-01 10:18:40
 */
-@Service
+@Service("PersonTYService")
 public class PersonTYServiceImpl extends ServiceImpl<PersonTYMapper, PersonTY>
     implements PersonTYService {
 

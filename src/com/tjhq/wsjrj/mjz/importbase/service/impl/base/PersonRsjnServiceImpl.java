@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 * @description 针对表【fm_hrmdata_rsjn】的数据库操作Service实现
 * @createDate 2022-12-07 15:22:27
 */
-@Service
+@Service("PersonRsjnService")
 public class PersonRsjnServiceImpl extends ServiceImpl<PersonRsjnMapper, PersonRsjn>
     implements PersonRsjnService {
 

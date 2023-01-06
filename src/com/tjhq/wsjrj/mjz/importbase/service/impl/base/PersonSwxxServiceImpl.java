@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 * @description 针对表【fm_hrmdata_swxx】的数据库操作Service实现
 * @createDate 2022-12-12 09:34:19
 */
-@Service
+@Service("PersonSwxxService")
 public class PersonSwxxServiceImpl extends ServiceImpl<PersonSwxxMapper, PersonSwxx>
     implements PersonSwxxService {
 

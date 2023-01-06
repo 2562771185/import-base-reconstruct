@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CjraImportExcelService extends AbstractImport {
-    @Autowired
-    private PersonCjraService cjraService;
 
     /**
      * 需要子类根据自己的情况过滤、转化数据
@@ -42,36 +40,20 @@ public class CjraImportExcelService extends AbstractImport {
      * @param vos 传入excel读取到的数据list
      */
     @Override
-    protected List filterAndConvertData(List vos) {
-        List collect = (List) vos.stream().map(vo -> {
-            if (vo.getClass().equals(CjraExcelVo.class)) {
-                PersonCjra personCjra = BeanUtil.copyProperties(vo, PersonCjra.class);
-                if (IdcardUtil.isValidCard(personCjra.getSfzh())) {
-                    //转化数据为入库形式
-                    personCjra.setSzyf(SSYFConvert.convertToDbData(personCjra.getSzyf()));
-                    return personCjra;
-                }
-            }
-            return null;
-        }).collect(Collectors.toList());
-        collect = (List) collect.stream().filter(item -> ObjectUtil.isNotNull(item)).collect(Collectors.toList());
-        return collect;
-    }
-
-    /**
-     * 生成过滤map
-     *
-     * @return 身份证号为key，多个entity为value的map
-     */
-    @Override
-    protected MultiMap createFilterMap() {
-        MultiMap sfzhMap = new MultiValueMap();
-        List<PersonCjra> list = cjraService.list();
-        for (PersonCjra cl : list) {
-            sfzhMap.put(cl.getSfzh(), cl);
-        }
-        sfzhMap.put(null, null);
-        return sfzhMap;
+    protected List<?> filterAndConvertData(List<?> vos) {
+        return vos.stream().map(vo -> {
+                    if (vo.getClass().equals(CjraExcelVo.class)) {
+                        PersonCjra personCjra = BeanUtil.copyProperties(vo, PersonCjra.class);
+                        if (IdcardUtil.isValidCard(personCjra.getSfzh())) {
+                            //转化数据为入库形式
+                            personCjra.setSzyf(SSYFConvert.convertToDbData(personCjra.getSzyf()));
+                            return personCjra;
+                        }
+                    }
+                    return null;
+                })
+                .filter(ObjectUtil::isNotNull)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -83,8 +65,8 @@ public class CjraImportExcelService extends AbstractImport {
     }
 
     /**
-     * @param entity
-     * @return
+     * @param entity 解析得到的实体类
+     * @return 返回拼接的插入SQL
      */
     @Override
     protected String buildSqlString(BaseEntity entity) {
